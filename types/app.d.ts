@@ -3,7 +3,6 @@ declare module 'app-types' {
   import { Variant } from '@practical-fp/union-types';
 
   type ErrorMessage = string;
-
   type Pokemon = string;
 
   type MemoryGameState =
