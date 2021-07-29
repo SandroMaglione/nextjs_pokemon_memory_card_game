@@ -1,7 +1,18 @@
+import * as E from 'fp-ts/Either';
+import { convertPokemonListToCards, getPokemonList } from '@lib/pokeapi';
+import { pipe } from 'fp-ts/lib/function';
+import { GetServerSidePropsResult } from 'next';
 import Head from 'next/head';
 import { ReactElement } from 'react';
+import { MemoryCardState, Pokemon } from 'app-types';
+import { mapWithIndex } from 'fp-ts/lib/Array';
+import MemoryCard from '@components/MemoryCard';
 
-export default function Home(): ReactElement {
+interface PageProps {
+  memoryCardList: MemoryCardState[];
+}
+
+export default function Home({ memoryCardList }: PageProps): ReactElement {
   return (
     <div>
       <Head>
@@ -13,7 +24,27 @@ export default function Home(): ReactElement {
         <h1 className="text-3xl font-bold text-gray-800">
           Welcome to the amazing Card Game Poke API
         </h1>
+        <div className="grid grid-cols-4 gap-4 mt-6">
+          {pipe(
+            memoryCardList,
+            mapWithIndex((cardIndex, memoryCardState) => (
+              <MemoryCard key={cardIndex} memoryCardState={memoryCardState} />
+            ))
+          )}
+        </div>
       </div>
     </div>
+  );
+}
+
+export async function getServerSideProps(): Promise<
+  GetServerSidePropsResult<PageProps>
+> {
+  return pipe(
+    await getPokemonList()(),
+    E.getOrElse((): Pokemon[] => []),
+    (pokemonList) => ({
+      props: { memoryCardList: convertPokemonListToCards(pokemonList) },
+    })
   );
 }
