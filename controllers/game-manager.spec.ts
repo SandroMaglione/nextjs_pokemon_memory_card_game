@@ -927,5 +927,3 @@ describe('handleClickOnCard', () => {
     );
   });
 });
-
-export {};

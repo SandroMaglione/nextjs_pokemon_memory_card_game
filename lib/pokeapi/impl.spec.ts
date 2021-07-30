@@ -160,5 +160,3 @@ describe('eqMemoryCardState', () => {
     expect(eqMemoryCardState.equals(cardState1, cardState2)).toBe(true);
   });
 });
-
-export {};

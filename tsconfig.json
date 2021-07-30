@@ -19,7 +19,8 @@
       "@utils/*": ["utils/*"],
       "@lib/*": ["lib/*"],
       "@services/*": ["services/*"],
-      "@types/*": ["types/*"]
+      "@types/*": ["types/*"],
+      "custom-renderer": ["test-utils/custom-renderer"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
