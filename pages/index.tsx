@@ -12,7 +12,7 @@ import {
   resetCardList,
 } from 'controllers/game-manager';
 import { map } from 'fp-ts/lib/Array';
-import { memoryGameState } from 'types/impl';
+import { memoryGameState } from '@lib/pokeapi/impl';
 import GameState from '@components/GameState';
 
 interface PageProps {

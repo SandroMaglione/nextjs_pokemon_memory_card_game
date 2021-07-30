@@ -9,7 +9,7 @@ import {
 import { FetchError, fetchJSON } from 'fp-fetch';
 import { map, mapWithIndex } from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/function';
-import { memoryCardState } from 'types/impl';
+import { memoryCardState } from '@lib/pokeapi/impl';
 import { randomInt } from 'fp-ts/lib/Random';
 
 /** Number of pokemons (cards) to show in the game */

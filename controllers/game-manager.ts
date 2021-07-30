@@ -12,7 +12,7 @@ import {
   eqPokemon,
   memoryCardState,
   memoryGameState,
-} from 'types/impl';
+} from '@lib/pokeapi/impl';
 import { updateWhere } from '@utils/array';
 
 /**
