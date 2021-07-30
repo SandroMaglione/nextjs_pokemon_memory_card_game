@@ -1,34 +1,21 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# `Pokemon Memory Card Game`
 
-## Getting Started
+This web application is a [Memory Card Game](https://www.youtube.com/watch?v=2x6AGMnePQE) in which you match [Pokemon](https://en.wikipedia.org/wiki/Pok%C3%A9mon). The Pokemon are fetched from the [PokeAPI](https://pokeapi.co/).
 
-First, run the development server:
+## Setup
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+The project uses [NextJs](https://nextjs.org/). The code is written using [Typescript](https://www.typescriptlang.org/). Other libraries and utilities used in the project are:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- [Jest](https://jestjs.io/): testing
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/): components testing
+- [Prettier](https://prettier.io/): code formatting
+- [ESlint](https://eslint.org/): code linting
+- [TailwindCSS](https://tailwindcss.com/): style
+- [fp-ts](https://gcanti.github.io/fp-ts/): functional programming
+- [@practical-fp/union-types](https://github.com/practical-fp/union-types): ADTs
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+Made by [**Sandro Maglione**](https://github.com/SandroMaglione):
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- [Twitter](https://twitter.com/SandroMaglione)
+- [Linkedin](https://www.linkedin.com/in/sandro-maglione97/)
+- [Github](https://github.com/SandroMaglione)
