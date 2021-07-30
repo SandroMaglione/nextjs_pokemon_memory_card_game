@@ -1,16 +1,16 @@
 import * as E from 'fp-ts/Either';
-import * as O from 'fp-ts/Option';
 import { convertPokemonListToCards, getPokemonList } from '@lib/pokeapi';
 import { pipe } from 'fp-ts/lib/function';
 import { GetServerSidePropsResult } from 'next';
 import Head from 'next/head';
 import { ReactElement, useState } from 'react';
 import { MemoryCardState, Pokemon } from 'app-types';
-import { mapWithIndex } from 'fp-ts/lib/Array';
 import MemoryCard from '@components/MemoryCard';
-import { updateAt } from 'fp-ts/lib/Array';
-import { handleClickOnCard } from 'controllers/game-manager';
-import { memoryGameState } from 'types/impl';
+import {
+  gameStateFromMemoryCardList,
+  handleClickOnCard,
+} from 'controllers/game-manager';
+import { map } from 'fp-ts/lib/Array';
 
 interface PageProps {
   memoryCardList: MemoryCardState[];
@@ -18,30 +18,9 @@ interface PageProps {
 
 export default function Home({ memoryCardList }: PageProps): ReactElement {
   const [cardList, setCardList] = useState<MemoryCardState[]>(memoryCardList);
-  const handleClick = (cardIndex: number, cardState: MemoryCardState): void => {
-    console.log('Clicked on card', {
-      cardIndex,
-      cardState,
-      newCard: handleClickOnCard({
-        cardState,
-        gameState: memoryGameState.all_hidden(),
-      }),
-    });
-
-    setCardList(
-      pipe(
-        cardList,
-        updateAt(
-          cardIndex,
-          handleClickOnCard({
-            cardState,
-            gameState: memoryGameState.all_hidden(),
-          })
-        ),
-        O.getOrElse(() => cardList)
-      )
-    );
-  };
+  const gameState = gameStateFromMemoryCardList(cardList);
+  const handleClick = (cardState: MemoryCardState): void =>
+    setCardList(handleClickOnCard({ cardState, gameState }));
 
   return (
     <div>
@@ -57,11 +36,11 @@ export default function Home({ memoryCardList }: PageProps): ReactElement {
         <div className="grid grid-cols-4 gap-4 mt-6">
           {pipe(
             cardList,
-            mapWithIndex((cardIndex, cardState) => (
+            map((cardState) => (
               <MemoryCard
-                key={cardIndex}
+                key={cardState.value.id}
                 cardState={cardState}
-                handleClick={() => handleClick(cardIndex, cardState)}
+                handleClick={() => handleClick(cardState)}
               />
             ))
           )}

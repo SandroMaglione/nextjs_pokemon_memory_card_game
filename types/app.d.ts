@@ -5,13 +5,18 @@ declare module 'app-types' {
   type ErrorMessage = string;
   type Pokemon = string;
 
+  type PokemonState = {
+    id: number;
+    pokemon: Pokemon;
+  };
+
+  type MemoryCardState =
+    | Variant<'hidden', PokemonState>
+    | Variant<'showing', PokemonState>
+    | Variant<'revealed', PokemonState>;
+
   type MemoryGameState =
     | Variant<'all_hidden'>
     | Variant<'all_revealed'>
-    | Variant<'one_showing'>;
-
-  type MemoryCardState =
-    | Variant<'hidden', Pokemon>
-    | Variant<'showing', Pokemon>
-    | Variant<'revealed', Pokemon>;
+    | Variant<'one_showing', PokemonState>;
 }

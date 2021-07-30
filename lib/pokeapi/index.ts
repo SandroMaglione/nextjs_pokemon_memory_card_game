@@ -1,6 +1,11 @@
 import { shuffle } from '@utils/array';
-import { ErrorMessage, MemoryCardState, Pokemon } from 'app-types';
-import { map } from 'fp-ts/lib/Array';
+import {
+  ErrorMessage,
+  MemoryCardState,
+  Pokemon,
+  PokemonState,
+} from 'app-types';
+import { map, mapWithIndex } from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/function';
 import * as TE from 'fp-ts/TaskEither';
 import { memoryCardState } from 'types/impl';
@@ -20,4 +25,12 @@ export const getPokemonList = (): TE.TaskEither<ErrorMessage, Pokemon[]> =>
 export const convertPokemonListToCards = (
   pokemonList: Pokemon[]
 ): MemoryCardState[] =>
-  pipe([...pokemonList, ...pokemonList], map(memoryCardState.hidden), shuffle);
+  pipe(
+    [...pokemonList, ...pokemonList],
+    mapWithIndex<Pokemon, PokemonState>((id, pokemon) => ({
+      pokemon,
+      id,
+    })),
+    map(memoryCardState.hidden),
+    shuffle
+  );

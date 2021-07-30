@@ -1,21 +1,104 @@
+import * as O from 'fp-ts/Option';
 import { matchExhaustive } from '@practical-fp/union-types';
 import { MemoryCardState, MemoryGameState } from 'app-types';
-import { memoryCardState } from 'types/impl';
+import { every, findFirst } from 'fp-ts/lib/Array';
+import { pipe } from 'fp-ts/lib/function';
+import {
+  eqMemoryCardState,
+  eqPokemon,
+  memoryCardState,
+  memoryGameState,
+} from 'types/impl';
+import { updateWhere } from '@utils/array';
 
-export const handleClickOnCard = ({
-  cardState,
-  gameState,
-}: {
-  gameState: MemoryGameState;
-  cardState: MemoryCardState;
-}): MemoryCardState =>
-  matchExhaustive(cardState, {
-    hidden: (pokemon): MemoryCardState =>
-      matchExhaustive(gameState, {
-        all_hidden: (): MemoryCardState => memoryCardState.showing(pokemon),
-        one_showing: (): MemoryCardState => cardState,
-        all_revealed: (): MemoryCardState => cardState,
-      }),
-    showing: memoryCardState.showing,
-    revealed: (): MemoryCardState => cardState,
-  });
+/**
+ * Derive `MemoryGameState` from current list of card in the game
+ * @param cardList Current list of `MemoryCardState` in the game
+ * @returns Current `MemoryGameState` of the game
+ */
+export const gameStateFromMemoryCardList = (
+  cardList: MemoryCardState[]
+): MemoryGameState =>
+  pipe(
+    cardList,
+    every(memoryCardState.revealed.is),
+    (isAllRevealed): O.Option<MemoryGameState> =>
+      isAllRevealed ? O.of(memoryGameState.all_revealed()) : O.none,
+    O.alt(() =>
+      pipe(
+        cardList,
+        every(memoryCardState.hidden.is),
+        (isAllHidden): O.Option<MemoryGameState> =>
+          isAllHidden ? O.of(memoryGameState.all_hidden()) : O.none
+      )
+    ),
+    O.getOrElse(
+      (): MemoryGameState =>
+        memoryGameState.one_showing(
+          pipe(
+            cardList,
+            findFirst<MemoryCardState, MemoryCardState>(
+              memoryCardState.showing.is
+            ),
+            O.getOrElse(() => cardList[0]) // TODO: Impossible state, how to handle?
+          ).value
+        )
+    )
+  );
+
+export const handleClickOnCard =
+  ({
+    cardState,
+    gameState,
+  }: {
+    gameState: MemoryGameState;
+    cardState: MemoryCardState;
+  }) =>
+  (cardList: MemoryCardState[]): MemoryCardState[] =>
+    matchExhaustive(cardState, {
+      hidden: (pokemon): MemoryCardState[] =>
+        matchExhaustive(gameState, {
+          all_hidden: (): MemoryCardState[] =>
+            pipe(
+              cardList,
+              updateWhere<MemoryCardState>(
+                cardState,
+                eqMemoryCardState
+              )(memoryCardState.showing(pokemon))
+            ),
+          one_showing: (showingPokemon): MemoryCardState[] =>
+            eqPokemon.equals(pokemon.pokemon, showingPokemon.pokemon)
+              ? pipe(
+                  cardList,
+                  updateWhere(
+                    cardState,
+                    eqMemoryCardState
+                  )(memoryCardState.revealed(pokemon)),
+                  updateWhere<MemoryCardState>(
+                    memoryCardState.showing(showingPokemon),
+                    eqMemoryCardState
+                  )(memoryCardState.revealed(showingPokemon))
+                )
+              : pipe(
+                  cardList,
+                  updateWhere<MemoryCardState>(
+                    cardState,
+                    eqMemoryCardState
+                  )(memoryCardState.showing(pokemon)),
+                  updateWhere<MemoryCardState>(
+                    memoryCardState.showing(showingPokemon),
+                    eqMemoryCardState
+                  )(memoryCardState.showing(showingPokemon))
+                ),
+          all_revealed: (): MemoryCardState[] => cardList,
+        }),
+      showing: (pokemonData): MemoryCardState[] =>
+        pipe(
+          cardList,
+          updateWhere<MemoryCardState>(
+            cardState,
+            eqMemoryCardState
+          )(memoryCardState.hidden(pokemonData))
+        ),
+      revealed: (): MemoryCardState[] => cardList,
+    });

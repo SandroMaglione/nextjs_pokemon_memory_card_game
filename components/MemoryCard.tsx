@@ -17,8 +17,8 @@ export default function MemoryCard({
         <span className="block w-full h-full text-lg font-bold">
           {matchExhaustive(cardState, {
             hidden: () => '???',
-            showing: (pokemon) => pokemon,
-            revealed: (pokemon) => pokemon,
+            showing: ({ pokemon }) => pokemon,
+            revealed: ({ pokemon }) => pokemon,
           })}
         </span>
       </button>
