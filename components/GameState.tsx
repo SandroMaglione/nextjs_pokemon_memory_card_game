@@ -13,7 +13,7 @@ export default function GameState({
         {matchExhaustive(gameState, {
           all_hidden: () => 'What is next?',
           all_revealed: () => 'Completed!',
-          one_showing: ({ pokemon }) => `Where is the other ${pokemon}?`,
+          one_showing: ({ pokemon }) => `Where is the other ${pokemon.name}?`,
           two_showing: () => 'Sorry, no match found...',
         })}
       </span>

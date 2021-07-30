@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "tsc": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@practical-fp/union-types": "^1.5.1",
+    "fp-fetch": "^0.1.1",
     "fp-ts": "^2.11.1",
     "next": "11.0.1",
     "react": "17.0.2",

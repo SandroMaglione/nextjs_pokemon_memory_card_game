@@ -1,5 +1,9 @@
 import * as O from 'fp-ts/Option';
-import { matchExhaustive } from '@practical-fp/union-types';
+import {
+  matchExhaustive,
+  matchWildcard,
+  WILDCARD,
+} from '@practical-fp/union-types';
 import { MemoryCardState, MemoryGameState } from 'app-types';
 import { every, filter, map } from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/function';
@@ -46,6 +50,11 @@ export const gameStateFromMemoryCardList = (
     )
   );
 
+/**
+ * When the user clicks a card, update the state of the game
+ * @param param0 Current `cardState` and `gameState`
+ * @returns New list of memory card updated based on the current state
+ */
 export const handleClickOnCard =
   ({
     cardState,
@@ -55,53 +64,57 @@ export const handleClickOnCard =
     cardState: MemoryCardState;
   }) =>
   (cardList: MemoryCardState[]): MemoryCardState[] =>
-    matchExhaustive(cardState, {
-      hidden: (pokemon): MemoryCardState[] =>
-        matchExhaustive(gameState, {
-          all_hidden: (): MemoryCardState[] =>
+    matchWildcard(gameState, {
+      two_showing: () => resetCardList(cardList),
+      [WILDCARD]: () =>
+        matchExhaustive(cardState, {
+          hidden: (pokemon): MemoryCardState[] =>
+            matchExhaustive(gameState, {
+              all_hidden: (): MemoryCardState[] =>
+                pipe(
+                  cardList,
+                  updateWhere<MemoryCardState>(
+                    cardState,
+                    eqMemoryCardState
+                  )(memoryCardState.showing(pokemon))
+                ),
+              one_showing: (showingPokemon): MemoryCardState[] =>
+                eqPokemon.equals(pokemon.pokemon, showingPokemon.pokemon)
+                  ? pipe(
+                      cardList,
+                      updateWhere(
+                        cardState,
+                        eqMemoryCardState
+                      )(memoryCardState.revealed(pokemon)),
+                      updateWhere<MemoryCardState>(
+                        memoryCardState.showing(showingPokemon),
+                        eqMemoryCardState
+                      )(memoryCardState.revealed(showingPokemon))
+                    )
+                  : pipe(
+                      cardList,
+                      updateWhere<MemoryCardState>(
+                        cardState,
+                        eqMemoryCardState
+                      )(memoryCardState.showing(pokemon)),
+                      updateWhere<MemoryCardState>(
+                        memoryCardState.showing(showingPokemon),
+                        eqMemoryCardState
+                      )(memoryCardState.showing(showingPokemon))
+                    ),
+              all_revealed: (): MemoryCardState[] => cardList,
+              two_showing: (): MemoryCardState[] => cardList,
+            }),
+          showing: (pokemonData): MemoryCardState[] =>
             pipe(
               cardList,
               updateWhere<MemoryCardState>(
                 cardState,
                 eqMemoryCardState
-              )(memoryCardState.showing(pokemon))
+              )(memoryCardState.hidden(pokemonData))
             ),
-          one_showing: (showingPokemon): MemoryCardState[] =>
-            eqPokemon.equals(pokemon.pokemon, showingPokemon.pokemon)
-              ? pipe(
-                  cardList,
-                  updateWhere(
-                    cardState,
-                    eqMemoryCardState
-                  )(memoryCardState.revealed(pokemon)),
-                  updateWhere<MemoryCardState>(
-                    memoryCardState.showing(showingPokemon),
-                    eqMemoryCardState
-                  )(memoryCardState.revealed(showingPokemon))
-                )
-              : pipe(
-                  cardList,
-                  updateWhere<MemoryCardState>(
-                    cardState,
-                    eqMemoryCardState
-                  )(memoryCardState.showing(pokemon)),
-                  updateWhere<MemoryCardState>(
-                    memoryCardState.showing(showingPokemon),
-                    eqMemoryCardState
-                  )(memoryCardState.showing(showingPokemon))
-                ),
-          all_revealed: (): MemoryCardState[] => cardList,
-          two_showing: (): MemoryCardState[] => cardList,
+          revealed: (): MemoryCardState[] => cardList,
         }),
-      showing: (pokemonData): MemoryCardState[] =>
-        pipe(
-          cardList,
-          updateWhere<MemoryCardState>(
-            cardState,
-            eqMemoryCardState
-          )(memoryCardState.hidden(pokemonData))
-        ),
-      revealed: (): MemoryCardState[] => cardList,
     });
 
 /**

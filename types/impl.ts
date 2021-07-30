@@ -10,7 +10,7 @@ import {
 /**
  * Equals comparison between two `Pokemon`
  */
-export const eqPokemon = Eq.fromEquals<Pokemon>((p1, p2) => p1 === p2);
+export const eqPokemon = Eq.fromEquals<Pokemon>((p1, p2) => p1.id === p2.id);
 
 /**
  * Equals comparison between two `PokemonState`
