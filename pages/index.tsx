@@ -3,14 +3,17 @@ import { convertPokemonListToCards, getPokemonList } from '@lib/pokeapi';
 import { pipe } from 'fp-ts/lib/function';
 import { GetServerSidePropsResult } from 'next';
 import Head from 'next/head';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { MemoryCardState, Pokemon } from 'app-types';
 import MemoryCard from '@components/MemoryCard';
 import {
   gameStateFromMemoryCardList,
   handleClickOnCard,
+  resetCardList,
 } from 'controllers/game-manager';
 import { map } from 'fp-ts/lib/Array';
+import { memoryGameState } from 'types/impl';
+import GameState from '@components/GameState';
 
 interface PageProps {
   memoryCardList: MemoryCardState[];
@@ -21,6 +24,14 @@ export default function Home({ memoryCardList }: PageProps): ReactElement {
   const gameState = gameStateFromMemoryCardList(cardList);
   const handleClick = (cardState: MemoryCardState): void =>
     setCardList(handleClickOnCard({ cardState, gameState }));
+
+  useEffect(() => {
+    if (memoryGameState.two_showing.is(gameState)) {
+      setTimeout(() => {
+        setCardList(resetCardList);
+      }, 2000);
+    }
+  }, [gameState]);
 
   return (
     <div>
@@ -33,6 +44,7 @@ export default function Home({ memoryCardList }: PageProps): ReactElement {
         <h1 className="text-3xl font-bold text-gray-800">
           Welcome to the amazing Card Game Poke API
         </h1>
+        <GameState gameState={gameState} />
         <div className="grid grid-cols-4 gap-4 mt-6">
           {pipe(
             cardList,

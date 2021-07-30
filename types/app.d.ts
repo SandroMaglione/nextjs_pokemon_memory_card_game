@@ -18,5 +18,6 @@ declare module 'app-types' {
   type MemoryGameState =
     | Variant<'all_hidden'>
     | Variant<'all_revealed'>
-    | Variant<'one_showing', PokemonState>;
+    | Variant<'one_showing', PokemonState>
+    | Variant<'two_showing', [PokemonState, PokemonState]>;
 }

@@ -1,7 +1,7 @@
 import * as O from 'fp-ts/Option';
 import { matchExhaustive } from '@practical-fp/union-types';
 import { MemoryCardState, MemoryGameState } from 'app-types';
-import { every, findFirst } from 'fp-ts/lib/Array';
+import { every, filter, map } from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/function';
 import {
   eqMemoryCardState,
@@ -27,6 +27,7 @@ export const gameStateFromMemoryCardList = (
     O.alt(() =>
       pipe(
         cardList,
+        filter((cardState) => !memoryCardState.revealed.is(cardState)),
         every(memoryCardState.hidden.is),
         (isAllHidden): O.Option<MemoryGameState> =>
           isAllHidden ? O.of(memoryGameState.all_hidden()) : O.none
@@ -34,14 +35,13 @@ export const gameStateFromMemoryCardList = (
     ),
     O.getOrElse(
       (): MemoryGameState =>
-        memoryGameState.one_showing(
-          pipe(
-            cardList,
-            findFirst<MemoryCardState, MemoryCardState>(
-              memoryCardState.showing.is
-            ),
-            O.getOrElse(() => cardList[0]) // TODO: Impossible state, how to handle?
-          ).value
+        pipe(cardList, filter(memoryCardState.showing.is), (showingCards) =>
+          showingCards.length === 2
+            ? memoryGameState.two_showing([
+                showingCards[0].value,
+                showingCards[1].value,
+              ])
+            : memoryGameState.one_showing(showingCards[0].value)
         )
     )
   );
@@ -91,6 +91,7 @@ export const handleClickOnCard =
                   )(memoryCardState.showing(showingPokemon))
                 ),
           all_revealed: (): MemoryCardState[] => cardList,
+          two_showing: (): MemoryCardState[] => cardList,
         }),
       showing: (pokemonData): MemoryCardState[] =>
         pipe(
@@ -102,3 +103,18 @@ export const handleClickOnCard =
         ),
       revealed: (): MemoryCardState[] => cardList,
     });
+
+/**
+ * Convert all cards which are not yet revealed to hidden
+ * @param cardList List of card to reset
+ * @returns List of card all hidden
+ */
+export const resetCardList = (cardList: MemoryCardState[]): MemoryCardState[] =>
+  pipe(
+    cardList,
+    map((cardState) =>
+      memoryCardState.revealed.is(cardState)
+        ? cardState
+        : memoryCardState.hidden(cardState.value)
+    )
+  );
