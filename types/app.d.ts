@@ -1,41 +1,19 @@
 declare module 'app-types' {
   import('@practical-fp/union-types');
+  import('./validation/poke_api_response');
+  import('io-ts');
+  import * as t from 'io-ts';
+  import { pokeApiResponse, pokemon } from './validation/poke_api_response';
   import { Variant } from '@practical-fp/union-types';
 
   type ErrorMessage = string;
 
-  interface PokemonSprites {
-    back_female: string;
-    back_shiny_female: string;
-    back_default: string;
-    front_female: string;
-    front_shiny_female: string;
-    back_shiny: string;
-    front_default: string;
-    front_shiny: string;
-  }
-
-  interface Pokemon {
-    id: number;
-    name: string;
-    sprites: PokemonSprites;
-  }
+  type Pokemon = t.TypeOf<typeof pokemon>;
+  type PokeApiResponse = t.TypeOf<typeof pokeApiResponse>;
 
   interface PokemonState {
     id: number;
     pokemon: Pokemon;
-  }
-
-  interface PokeApiResponseResult {
-    name: string;
-    url: string;
-  }
-
-  interface PokeApiResponse {
-    count: number;
-    next: string;
-    previous: string;
-    results: PokeApiResponseResult[];
   }
 
   type MemoryCardState =

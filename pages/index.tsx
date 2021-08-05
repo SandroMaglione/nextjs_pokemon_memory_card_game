@@ -4,7 +4,7 @@ import { pipe } from 'fp-ts/lib/function';
 import { GetServerSidePropsResult } from 'next';
 import Head from 'next/head';
 import { ReactElement, useEffect, useState } from 'react';
-import { MemoryCardState, Pokemon } from 'app-types';
+import { MemoryCardState } from 'app-types';
 import MemoryCard from '@components/MemoryCard';
 import {
   gameStateFromMemoryCardList,
@@ -14,14 +14,20 @@ import {
 import { map } from 'fp-ts/lib/Array';
 import { memoryGameState } from '@lib/pokeapi/impl';
 import GameState from '@components/GameState';
+import { randomInt } from 'fp-ts/lib/Random';
 
 interface PageProps {
-  memoryCardList: MemoryCardState[];
+  memoryCardList: E.Either<string | undefined, MemoryCardState[]>;
 }
 
 export default function Home({ memoryCardList }: PageProps): ReactElement {
   const [timer, setTimer] = useState<number | null>(null);
-  const [cardList, setCardList] = useState<MemoryCardState[]>(memoryCardList);
+  const [cardList, setCardList] = useState<MemoryCardState[]>(
+    pipe(
+      memoryCardList,
+      E.getOrElse((): MemoryCardState[] => [])
+    )
+  );
   const gameState = gameStateFromMemoryCardList(cardList);
   const gameStateIsTwoShowing = memoryGameState.two_showing.is(gameState);
   const handleClick = (cardState: MemoryCardState): void => {
@@ -74,33 +80,53 @@ export default function Home({ memoryCardList }: PageProps): ReactElement {
             </svg>
           </button>
         </div>
-        <GameState gameState={gameState} />
-        <div className="grid grid-cols-4 gap-4 mt-6">
-          {pipe(
-            cardList,
-            map((cardState) => (
-              <MemoryCard
-                key={cardState.value.id}
-                cardState={cardState}
-                handleClick={() => handleClick(cardState)}
-              />
-            ))
-          )}
-        </div>
+        {pipe(
+          memoryCardList,
+          E.fold(
+            (error) => (
+              <span className="text-lg font-bold text-red-600">{error}</span>
+            ),
+            () => (
+              <>
+                <GameState gameState={gameState} />
+                <div className="grid grid-cols-4 gap-4 mt-6">
+                  {pipe(
+                    cardList,
+                    map((cardState) => (
+                      <MemoryCard
+                        key={cardState.value.id}
+                        cardState={cardState}
+                        handleClick={() => handleClick(cardState)}
+                      />
+                    ))
+                  )}
+                </div>
+              </>
+            )
+          )
+        )}
       </div>
     </div>
   );
 }
 
-// TODO: Display error message when getPokemonList fails
+/** Number of pokemons (cards) to show in the game */
+const numberOfPokemons = 8;
+
 export async function getServerSideProps(): Promise<
   GetServerSidePropsResult<PageProps>
 > {
   return pipe(
-    await getPokemonList()(),
-    E.getOrElse((): readonly Pokemon[] => []),
-    (pokemonList) => ({
-      props: { memoryCardList: convertPokemonListToCards(pokemonList) },
+    await getPokemonList(numberOfPokemons)(randomInt(0, 780))(),
+    (either) => ({
+      props: {
+        memoryCardList: pipe(
+          either,
+          E.map(convertPokemonListToCards),
+          E.map((io) => io()),
+          E.mapLeft((validationError) => validationError.message)
+        ),
+      },
     })
   );
 }

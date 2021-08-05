@@ -1,16 +1,17 @@
 import * as Eq from 'fp-ts/Eq';
+import * as IO from 'fp-ts/IO';
 import { map } from 'fp-ts/lib/Array';
 import { pipe } from 'fp-ts/lib/function';
 
 /** Shuffle randomly the given array, algorithm from https://stackoverflow.com/a/12646864/7033357 */
-export const shuffle = <T>(array: T[]): T[] => {
+export const shuffle = <T>(array: T[]): IO.IO<T[]> => {
   const source = [...array];
   for (let i = source.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [source[i], source[j]] = [source[j], source[i]];
   }
 
-  return source;
+  return IO.of(source);
 };
 
 /**

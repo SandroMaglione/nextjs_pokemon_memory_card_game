@@ -17,13 +17,16 @@ export default function MemoryCard({
       <button type="button" onClick={handleClick}>
         <img
           className="block w-[6rem] h-[6rem]"
-          src={matchExhaustive(cardState, {
-            hidden: () =>
-              'https://image.flaticon.com/icons/png/512/287/287221.png',
-            showing: (pokemonData) => pokemonData.pokemon.sprites.front_default,
-            revealed: (pokemonData) =>
-              pokemonData.pokemon.sprites.front_default,
-          })}
+          src={
+            matchExhaustive(cardState, {
+              hidden: () =>
+                'https://image.flaticon.com/icons/png/512/287/287221.png',
+              showing: (pokemonData) =>
+                pokemonData.pokemon.sprites?.front_default,
+              revealed: (pokemonData) =>
+                pokemonData.pokemon.sprites?.front_default,
+            }) ?? 'https://static.thenounproject.com/png/193751-200.png'
+          }
           alt=""
         />
       </button>
